@@ -15,13 +15,15 @@ class BayesNet:
         self.variable_nodes.append(newNode)
         return newNode
 
-    def createFactorNode(self, name):
+    def createFactorNode(self, name, edge_list, cpt_values):
         newNode = FactorNode(name)
         self.factor_nodes_map[name] = newNode
         self.factor_nodes.append(newNode)
+        self.addEdge(newNode, edge_list)
+        newNode.setCPT(cpt_values)
         return newNode
 
-    def addEdge(self, factor_node, *variable_nodes):
+    def addEdge(self, factor_node, variable_nodes):
         for x in variable_nodes:
             factor_node.addNeighbour(x)
             x.addNeighbour(factor_node)
@@ -43,10 +45,12 @@ class BayesNet:
             '''
             if node.checkReadiness(idx):
                 node.outgoing[idx] = True
-                partner_node_name = node.neighbours[idx].name
-                print node.name, partner_node_name
+                partner_node_name = node.neighbours[idx].name                
                 partner_node = self.factor_nodes_map[partner_node_name]
                 partner_node.setIncomingMessage(node.name)
+                print("Computing CPT for : ", node.name, partner_node_name)
+                computed_cpt = node.computeOutgoingCPT(idx)
+                partner_node.setIncomingCPT(node.name, computed_cpt)
 
     def passMessagesFactorNode(self, node):
         for idx in range(0,node.no_of_neighbours):
@@ -55,27 +59,28 @@ class BayesNet:
             '''
             if node.checkReadiness(idx):
                 node.outgoing[idx] = True
-                partner_node_name = node.neighbours[idx].name
-                print node.name, partner_node_name
+                partner_node_name = node.neighbours[idx].name            
                 partner_node = self.variable_nodes_map[partner_node_name]
                 partner_node.setIncomingMessage(node.name)
+                print("Computing CPT for : ", node.name, partner_node_name)
+                computed_cpt = node.computeOutgoingCPT(idx)
+                partner_node.setIncomingCPT(node.name, computed_cpt)
 
-    def runSumProduct(self):
-        print self.num_of_nodes
+    def runSumProduct(self):        
         no_of_iterations = self.num_of_nodes
 
         self.initializeNodeVariables();
 
         for iter in range(0, no_of_iterations):
-            print "iteration : ", iter
+            print("iteration : ", iter)
 
             '''
             iterate through variable nodes
             '''
             for x in self.variable_nodes:
                 self.passMessagesVariableNode(x)
-
-            print ""
+            
+            print("")
 
             '''
             iterate through variable nodes
@@ -83,9 +88,15 @@ class BayesNet:
             for x in self.factor_nodes:
                 self.passMessagesFactorNode(x)
 
-            print "***"
+            print("********************************************")
 
             for x in self.variable_nodes:
                 x.updateIncomingFlags()
             for x in self.factor_nodes:
                 x.updateIncomingFlags()
+
+        for x in self.variable_nodes:            
+            prob = 1.0
+            for y in x.incoming_cpt:
+                prob = prob * x.incoming_cpt[y].cpt_values[0]
+            print("Variable node : ",x.name, prob)
