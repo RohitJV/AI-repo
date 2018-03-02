@@ -33,7 +33,7 @@ class CPT:
 					resultant_cpt.cpt_values[i] = resultant_cpt.cpt_values[i] * cpt.cpt_values[0]
 			else:
 				col_idx = self.cond_var_to_index_map[cpt.node_name]				
-				mask = 1<<(self.conditionals_length - col_idx - 1);				
+				mask = 1<<(self.conditionals_length - col_idx - 1);		# use bitmasks to selectively choose the required column
 				for i in range(0, len(self.cpt_values)):
 					if (mask & i):
 						resultant_cpt.cpt_values[i] = resultant_cpt.cpt_values[i] * (1-cpt.cpt_values[0])

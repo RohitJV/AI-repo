@@ -15,7 +15,7 @@ marycalls = network.createVariableNode("marycalls")
 Create factor nodes
 '''
 B = network.createFactorNode("B", [burglary], [0.001])
-E = network.createFactorNode("E", [earthquake], [0.002])
+E = network.createFactorNode("E", [earthquake], [1.0])
 A = network.createFactorNode("A", [alarm, burglary, earthquake], [0.95, 0.94, 0.29, 0.001])
 J = network.createFactorNode("J", [johncalls, alarm], [0.90, 0.05])
 M = network.createFactorNode("M", [marycalls, alarm], [0.70, 0.01])

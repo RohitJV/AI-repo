@@ -95,8 +95,9 @@ class BayesNet:
             for x in self.factor_nodes:
                 x.updateIncomingFlags()
 
+        print("\nFinal Posterior Values :")
         for x in self.variable_nodes:            
             prob = 1.0
             for y in x.incoming_cpt:
                 prob = prob * x.incoming_cpt[y].cpt_values[0]
-            print("Variable node : ",x.name, prob)
+            print(x.name,":", prob)
